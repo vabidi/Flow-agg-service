@@ -98,6 +98,10 @@ Scale out with multiple workers.
 
 # TEST WITH Example Data
 
+Following is a screen capture from tests I did with the supplied example data.  
+Note that, compared to the example data,  I modified the values of 'hour' to 91, 92, 93.  
+Also, I added quotes around src_app and dest_app.  
+
 ```
 root@systest-runner:~/testfas[21674]# more flexample_data 
 [
@@ -127,12 +131,16 @@ root@systest-runner:~/testfas[21675]#
 
 
 
-# CHALLENGES
+# CHALLENGES FACED
 
  It took some time and effort to setup the Django environment.  
  Fortunately, the Django documentation is very good, and stackoverflow had
 solutions to problems I encountered during install.
 
+# TODO
+
+ - Add logging messages
+ - Add unit tests
 
 
 # REFERENCES
