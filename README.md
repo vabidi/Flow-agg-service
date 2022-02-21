@@ -68,8 +68,7 @@ We need a policy for how to free up space in the database.
 For the flow aggregation application, one approach would be to run a periodic
 job to move all flow-logs older than a particular 'hour' value into a separate
 archive. The would be done once a day,  once a week, etc.  
-Flow logs can also be aggregated into buckets with different granularities
-- for example, a 4-hour bucket, a 24-hour bucket, etc.
+Flow logs can also be aggregated into buckets with different granularities, for example, a 4-hour bucket, a 24-hour bucket, etc.
 
 
 
