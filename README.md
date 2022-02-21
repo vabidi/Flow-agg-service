@@ -14,7 +14,7 @@ Prerequisites:
    For example: `sudo ufw allow 8000`
 
 3. Run the server
-   `python manage.py server 0.0.0.0:8000`
+   `python manage.py runserver 0.0.0.0:8000`
 
 
 
