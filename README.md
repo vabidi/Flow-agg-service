@@ -1,23 +1,24 @@
 
-INSTRUCTIONS
+# INSTRUCTIONS
 
 Prerequisites:
-    ubuntu 18.04.4
-    python 3.6.9
-    django 3.2.12
+   - ubuntu 18.04.4
+   - python 3.6.9
+   - django 3.2.12
 
-1. Clone the git repo "flowag"
-2. Modify firewall rules and security-grooups to open the server port, if
+1. Clone the git repo from github.com/vabidi/Flow-agg-service
+
+2. Modify firewall rules and security-groups to open the server port, if
    needed. 
-   For example:
-      sudo ufw allow 8000
+
+   For example: `sudo ufw allow 8000`
 
 3. Run the server
-   'python manage.py server 0.0.0.0:8000'
+   `python manage.py server 0.0.0.0:8000`
 
 
 
-DESIGN
+# DESIGN
 
 I decided to use Python and Django for this exercise, because it could be 
 coded up rapidly to get a first cut, and to evaluate design choices for further
@@ -29,50 +30,50 @@ handlers in file fas/views.py.
 
 Code in fas/views.py has the logic to handle GET and POST requests.
 
-For this exercise I used the default SQLite database. For the next version, we
+For this exercise I used the default SQLite database.  For the next version, we
 should use a more scalable database like PostgreSQL.
 
-In Django, the database layout is abstracted into 'models'.
-Each model is represented by a class that subclasses django.db.models.Model. 
-A model has a number of class variables, each of which represents a database field in the model.
+In Django, the database layout is abstracted into 'models'.  
+Each model is represented by a class that subclasses django.db.models.Model.   
+A model has a number of class variables, each of which represents a database field in the model.  
 
-For this exercise, there is single model - class Flowlog.
+For this exercise, there is single model - class Flowlog.  
 It is defined in fas/models.py
 
-The primary key is a tuple (src_app, dest_app, vpc_id, hour).
-Django does not support multi-column keys. 
-Therefore, we create a unique 'hashkey' by concatenating the 4 values.
+The primary key is a tuple (src_app, dest_app, vpc_id, hour).  
+Django does not support multi-column keys.   
+Therefore, we create a unique 'hashkey' by concatenating the 4 values.  
 A drawback is that this new column uses additional, redundant storage in the
 database.
 
-  POST Handler
+  **POST Handler**
 
-  Find object matching the given values of (src_app, dest_app, vpc_id, hour)
+  Find object matching the given values of (src_app, dest_app, vpc_id, hour)  
   If object exists, update the values of bytes_tx and bytes_rx, and save it
-  back to the database.
+  back to the database.  
   If object does not exist, create a new object and save it to database.
 
- GET Handler
+ **GET Handler**
 
-  Find all objects matching the given value of 'hour'.
+  Find all objects matching the given value of 'hour'.  
   Return all fields of matching rows, except the 'hashkey'.
 
-STORAGE CONSIDERATIONS
+# STORAGE CONSIDERATIONS
 
 In this submission, the code enforces a maximum limit on the number of flow
 records saved. 
 
-The database will eventually fill up.
-We need a policy for how to free up space in the database.
+The database will eventually fill up.  
+We need a policy for how to free up space in the database.  
 For the flow aggregation application, one approach would be to run a periodic
 job to move all flow-logs older than a particular 'hour' value into a separate
-archive. The would be done once a day,  once a week, etc.
+archive. The would be done once a day,  once a week, etc.  
 Flow logs can also be aggregated into buckets with different granularities
 - for example, a 4-hour bucket, a 24-hour bucket, etc.
 
 
 
-PERFORMANCE CONSIDERATIONS
+# PERFORMANCE CONSIDERATIONS
 
  Use a nginx/gunicorn frontend for better performance, scaling, load-balancing,
 security.
@@ -85,19 +86,20 @@ security.
 expensive. Maybe a database schema with two tables, and integer key will be
 more efficient.
 
-Django is probably not the best framework for this application.
-For production, a time-series database would be better.
+Django is probably not the best framework for this application.  
+For production, a time-series database would be better.  
 I would look at design ideas from OpenTSDB.
 
 
-SCALING CONSIDERATIONS
+# SCALING CONSIDERATIONS
 
 Scale out with multiple workers. 
 
 
 
-TEST WITH Example Data
+# TEST WITH Example Data
 
+```
 root@systest-runner:~/testfas[21674]# more flexample_data 
 [
 {"src_app": "foo", "dest_app": "bar", "vpc_id": "vpc-0", "bytes_tx": 100, "bytes_rx": 500, "hour": 91},
@@ -121,24 +123,19 @@ root@systest-runner:~/testfas[21674]# curl  http://perfrunner-1:8000/fas/flows?h
 []
 
 root@systest-runner:~/testfas[21675]#
+```
 
 
 
 
+# CHALLENGES
 
-
-
-
-
-
-
-CHALLENGES
- It took some time and effort to setup the Django environment.
+ It took some time and effort to setup the Django environment.  
  Fortunately, the Django documentation is very good, and stackoverflow had
 solutions to problems I encountered during install.
 
 
 
-REFERENCES
+# REFERENCES
  1. Django docs  https://docs.djangoproject.com/
- 2 stackoverflow  
+ 2.  stackoverflow  
