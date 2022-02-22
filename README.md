@@ -8,8 +8,7 @@ Prerequisites:
 
 1. Clone the git repo from github.com/vabidi/Flow-agg-service
 
-2. Modify firewall rules and security-groups to open the server port, if
-   needed. 
+2. If needed, modify firewall rules and security-groups to open the server port,  
 
    For example: `sudo ufw allow 8000`
 
@@ -46,6 +45,20 @@ Therefore, we create a unique 'hashkey' by concatenating the 4 values.
 A drawback is that this new column uses additional, redundant storage in the
 database.
 
+The design optimizes lookups for POST, because writes are assumed to be
+more frequent than reads.  
+For GETs, the query requires stepping through the entire database, to collect
+the flow-logs with the matching 'hour' value. This can be made more efficient
+by redesigning the schema to have another table indexed by hour.  
+
+Raw data from the incoming flow logs is not stored individually. For each
+unique tuple, the aggregated bytes_tx and bytes_rx are stored.
+
+The maximum values of bytes_tx and bytes_rx are clamped at MAX_INTVAL, which is
+defined in views.py. This is to avoid issues with too-large integer values,
+e.g. arithmetic overflow, storing, serializing, cross-platform portability.
+
+
   **POST Handler**
 
   Find object matching the given values of (src_app, dest_app, vpc_id, hour)  
@@ -67,7 +80,7 @@ The database will eventually fill up.
 We need a policy for how to free up space in the database.  
 For the flow aggregation application, one approach would be to run a periodic
 job to move all flow-logs older than a particular 'hour' value into a separate
-archive. The would be done once a day,  once a week, etc.  
+archive. That could run once a day, once a week, etc.  
 Flow logs can also be aggregated into buckets with different granularities, for example, a 4-hour bucket, a 24-hour bucket, etc.
 
 
@@ -81,12 +94,14 @@ security.
 
  Django has support for many web-servers and databases.
 
- Do performance benchmarking to see if using a string as primary key is
+ Do performance benchmarking to check if using a string as primary key is
 expensive. Maybe a database schema with two tables, and integer key will be
 more efficient.
 
-Django is probably not the best framework for this application.  
+For the flow aggregation application, Django is probably not the best framework, and a relational database is not the best choice.   
 For production, a time-series database would be better.  
+I would design the schema to optimize writes and reads, based on careful
+performance benchmarking.  
 I would look at design ideas from OpenTSDB.
 
 
